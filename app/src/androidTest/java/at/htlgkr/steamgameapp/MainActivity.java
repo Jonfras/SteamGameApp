@@ -1,5 +1,6 @@
 package at.htlgkr.steamgameapp;
 
+import android.app.Dialog;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -7,8 +8,10 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,6 +20,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import at.htlgkr.steam.Game;
@@ -38,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
 
     Button search = findViewById(R.id.search);
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,10 +55,15 @@ public class MainActivity extends AppCompatActivity {
         setUpAddGameButton();
         setUpSaveButton();
 
+
+
+        /*
+          Listener für spinner
+         */
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                AlertDialog.Builder alertDialog = getDialog(position, alertDialog);
+                AlertDialog.Builder alertDialog = getDialog(position);
                 alertDialog.show();
             }
 
@@ -62,11 +73,31 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        search.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        /*
+          Listener für search Button
+         */
+        search.setOnClickListener(v -> {
+            View vDialog = getLayoutInflater().inflate(R.layout.search_dialog_layout, null);
 
-            }
+            EditText editText = findViewById(R.id.editText);
+            editText.setId(R.id.dialog_search_field);
+
+            TextView textView = findViewById(R.id.titleTextView);
+            textView.setText(SteamGameAppConstants.ENTER_SEARCH_TERM);
+
+            Button ok = findViewById(R.id.positiveButton);
+            Button cancel = findViewById(R.id.negativeButton);
+
+            vDialog.addChildrenForAccessibility(new ArrayList<View>(Arrays.asList(editText, textView, ok, cancel)));
+
+            AlertDialog alertDialog = new AlertDialog.Builder(getApplicationContext())
+                    .setMessage(SteamGameAppConstants.ENTER_SEARCH_TERM)
+                    .setView(vDialog)
+                    .show();
+
+            ok.setOnClickListener(v1 -> {
+                lis
+            });
         });
 
 
@@ -118,6 +149,8 @@ public class MainActivity extends AppCompatActivity {
 
         gameAdapter = new GameAdapter(this, R.layout.game_item_layout, steamBackend.getGames());
         listView.setAdapter(gameAdapter);
+
+        listView.setTextFilterEnabled(true);
     }
 
     private void setUpReportSelection() {
