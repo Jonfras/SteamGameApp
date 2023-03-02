@@ -21,7 +21,7 @@ public class SteamBackend {
     private List<Game> gameList = new ArrayList<>();
     private final String REGEX = ";";
     private final String HEADER = "Name;Release Date;Price";
-    private final File FILE = new File("src/test.csv");
+    private final File FILE = new File("assets/games.csv");
 
 
     public SteamBackend() {

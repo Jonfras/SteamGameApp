@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import at.htlgkr.steam.Game;
-import at.htlgkr.steam.GameFilter;
+
 
 public class GameAdapter extends BaseAdapter {
     private List<Game> gameList = new ArrayList<>();
@@ -58,14 +58,19 @@ public class GameAdapter extends BaseAdapter {
     }
 
     public Filter getFilter() {
-        if (filter == null){
-            filter  = new GameFilter();
+        if (filter == null) {
+            filter = new GameFilter();
         }
         return filter;
     }
 
-    private class GameFilter extends Filter {
+    public void filter(CharSequence constraint) {
+        GameFilter gf = new GameFilter();
 
+        gf.publishResults("", gf.performFiltering(constraint));
+    }
+
+    private class GameFilter extends Filter {
 
 
         @Override
@@ -95,11 +100,9 @@ public class GameAdapter extends BaseAdapter {
         //TODO des verstehen
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
-            gameList = (ArrayList<Game>)results.values;
+
+            gameList = (ArrayList<Game>) results.values;
             notifyDataSetChanged();
-            for(int i = 0, l = gameList.size(); i < l; i++)
-                add(gameList.get(i));
-            notifyDataSetInvalidated();
         }
     }
 }

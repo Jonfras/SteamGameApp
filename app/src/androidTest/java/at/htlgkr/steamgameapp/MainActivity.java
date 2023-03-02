@@ -9,6 +9,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -30,24 +31,27 @@ import at.htlgkr.steam.SteamBackend;
 public class MainActivity extends AppCompatActivity {
     private static final String GAMES_CSV = "games.csv";
     private static SteamBackend steamBackend = new SteamBackend();
-    private static final File FILE = new File("assets/games.csv");
+    private static final File FILE = new File(GAMES_CSV);
 
-    private ListView listView = findViewById(R.id.gamesList);
+    private ListView listView;
     private GameAdapter gameAdapter;
     private List<Game> gameList;
 
-    private Spinner spinner = findViewById(R.id.chooseReport);
+    private Spinner spinner;
     private ArrayAdapter<ReportTypeSpinnerItem> reportTypeArrayAdapter;
     private List<ReportTypeSpinnerItem> reportTypeSpinnerItems;
 
-    Button search = findViewById(R.id.search);
-
+    Button search;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        listView = findViewById(R.id.gamesList);
+        spinner = findViewById(R.id.chooseReport);
+        search = findViewById(R.id.search);
 
         loadGamesIntoListView();
         setUpReportSelection();
@@ -77,65 +81,63 @@ public class MainActivity extends AppCompatActivity {
           Listener für search Button
          */
         search.setOnClickListener(v -> {
-            View vDialog = getLayoutInflater().inflate(R.layout.search_dialog_layout, null);
+            AlertDialog.Builder alert = new AlertDialog.Builder(getApplicationContext());
 
-            EditText editText = findViewById(R.id.editText);
-            editText.setId(R.id.dialog_search_field);
+            final EditText input = new EditText(getApplicationContext());
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT);
+            input.setLayoutParams(lp);
+            input.setId(R.id.dialog_search_field);
 
-            TextView textView = findViewById(R.id.titleTextView);
-            textView.setText(SteamGameAppConstants.ENTER_SEARCH_TERM);
-
-            Button ok = findViewById(R.id.positiveButton);
-            Button cancel = findViewById(R.id.negativeButton);
-
-            vDialog.addChildrenForAccessibility(new ArrayList<View>(Arrays.asList(editText, textView, ok, cancel)));
-
-            AlertDialog alertDialog = new AlertDialog.Builder(getApplicationContext())
-                    .setMessage(SteamGameAppConstants.ENTER_SEARCH_TERM)
-                    .setView(vDialog)
-                    .show();
-
-            ok.setOnClickListener(v1 -> {
-                lis
+            alert.setView(input);
+            alert.setTitle(SteamGameAppConstants.ENTER_SEARCH_TERM);
+            alert.setPositiveButton("Search", (dialogInterface, i) -> {
+                gameAdapter.filter(input.getText());
             });
+            alert.setNegativeButton("Cancel", null);
+            alert.show();
         });
-
 
 
     }
 
     private AlertDialog.Builder getDialog(int position) {
         AlertDialog.Builder alertDialog = null;
-        switch (position){
-            case 2: alertDialog = new AlertDialog.Builder(getApplicationContext())
-                            .setMessage(SteamGameAppConstants.ALL_PRICES_SUM
-                                    + steamBackend.sumGamePrices())
+        switch (position) {
+            case 2:
+                alertDialog = new AlertDialog.Builder(getApplicationContext())
+                        .setMessage(SteamGameAppConstants.ALL_PRICES_SUM
+                                + steamBackend.sumGamePrices())
 
-                            .setNeutralButton("OK", null);
-            break;
+                        .setNeutralButton("OK", null);
+                break;
 
-            case 3: alertDialog = new AlertDialog.Builder(getApplicationContext())
-                            .setMessage(SteamGameAppConstants.ALL_PRICES_AVERAGE
-                                    + steamBackend.averageGamePrice())
+            case 3:
+                alertDialog = new AlertDialog.Builder(getApplicationContext())
+                        .setMessage(SteamGameAppConstants.ALL_PRICES_AVERAGE
+                                + steamBackend.averageGamePrice())
 
-                            .setNeutralButton("OK", null);
-            break;
+                        .setNeutralButton("OK", null);
+                break;
 
-            case 4: alertDialog = new AlertDialog.Builder(getApplicationContext())
-                    .setMessage(SteamGameAppConstants.UNIQUE_GAMES_COUNT
-                            + steamBackend.getUniqueGames().size())
+            case 4:
+                alertDialog = new AlertDialog.Builder(getApplicationContext())
+                        .setMessage(SteamGameAppConstants.UNIQUE_GAMES_COUNT
+                                + steamBackend.getUniqueGames().size())
 
-                    .setNeutralButton("OK", null);
-            break;
+                        .setNeutralButton("OK", null);
+                break;
 
-            case 5: List<Game> list = steamBackend.selectTopNGamesDependingOnPrice(3);
+            case 5:
+                List<Game> list = steamBackend.selectTopNGamesDependingOnPrice(3);
 
                 alertDialog = new AlertDialog.Builder(getApplicationContext())
-                    .setMessage(SteamGameAppConstants.MOST_EXPENSIVE_GAMES
-                            + "\n" + list.get(0) + "\n" + list.get(1) + "\n" + list.get(2))
+                        .setMessage(SteamGameAppConstants.MOST_EXPENSIVE_GAMES
+                                + "\n" + list.get(0) + "\n" + list.get(1) + "\n" + list.get(2))
 
-                    .setNeutralButton("OK", null);
-            break;
+                        .setNeutralButton("OK", null);
+                break;
 
             default:
                 System.out.println("Dummy");
@@ -178,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
         // Implementieren Sie diese Methode.
     }
 
-    public InputStream getInputStream()  {
+    public InputStream getInputStream() {
         try {
             return new FileInputStream(FILE);
         } catch (FileNotFoundException e) {
